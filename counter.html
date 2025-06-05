@@ -1,23 +1,110 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calorie Counter</title>
-    <link rel="stylesheet" href="css/style.css">
-    <script src="js/app.js" defer></script>
+    <title>Calories Count</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- jQuery and jQuery Mobile -->
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script>
+        // Mobileinit must be before loading jQuery Mobile
+        $(document).on("mobileinit", function () {
+            $.mobile.autoInitializePage = true;
+            $.mobile.defaultPageTransition = "fade";
+        });
+    </script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+
+    <style>
+        .splash-screen {
+            text-align: center;
+            padding: 100px 20px;
+        }
+        .splash-button {
+            margin-top: 30px;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Calorie Counter</h1>
-        <nav>
-            <a href="index.html">Home</a>
-        </nav>
-    </header>
-    <main>
-        <h2>Total Calories: <span id="total">0</span> cal</h2>
-        <button onclick="resetCalories()">Reset</button>
-    </main>
+
+    <!-- Splash Page -->
+    <div data-role="page" id="splash">
+        <div data-role="content" class="splash-screen">
+            <h1>Calories Count</h1>
+            <p>Your health, your way.</p>
+            <a href="#home" data-role="button" class="splash-button" data-transition="fade">Get Started</a>
+        </div>
+    </div>
+
+    <!-- Home Page -->
+    <div data-role="page" id="home">
+        <div data-role="header">
+            <h1>Calories Count</h1>
+        </div>
+
+        <div role="main" class="ui-content">
+            <form id="foodForm">
+                <label for="food">Food Item:</label>
+                <input type="text" id="food" name="food" required>
+
+                <label for="calories">Calories:</label>
+                <input type="number" id="calories" name="calories" required>
+
+                <input type="submit" value="Add">
+            </form>
+
+            <ul id="foodList" data-role="listview" data-inset="true"></ul>
+        </div>
+
+        <div data-role="footer" data-position="fixed">
+            <h4>Total Calories: <span id="totalCalories">0</span></h4>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let totalCalories = 0;
+
+        function updateCalorieDisplay() {
+            document.getElementById("totalCalories").textContent = totalCalories;
+        }
+
+        $(document).on("pagecreate", "#home", function () {
+            $("#foodForm").submit(function (event) {
+                event.preventDefault();
+
+                const food = $("#food").val().trim();
+                const calories = parseInt($("#calories").val());
+
+                if (food && !isNaN(calories)) {
+                    totalCalories += calories;
+
+                    $("#foodList").append(
+                        `<li>${food}: ${calories} cal</li>`
+                    ).listview("refresh");
+
+                    updateCalorieDisplay();
+
+                    $("#food").val("");
+                    $("#calories").val("");
+                }
+            });
+        });
+
+        // Auto redirect from splash to home after 2 seconds
+        $(document).on("pagecreate", "#splash", function () {
+            setTimeout(function () {
+                $.mobile.changePage("#home", { transition: "fade" });
+            }, 2000);
+        });
+
+        // Ensure calorie count updates on entering the home page
+        $(document).on("pagebeforeshow", "#home", function () {
+            updateCalorieDisplay();
+        });
+    </script>
+
 </body>
 </html>
